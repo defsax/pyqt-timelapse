@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
     self.intervals = IntervalOptions(["1", "5", "30", "60", "180"])
     
     # set up which durations are wanted (minutes)
-    self.durations = DurationOptions(["5", "25", "180", "360", "540", "1020", "3840"])
+    self.durations = DurationOptions(["5", "25", "180", "360", "540", "960", "1020", "3840"])
     
     # initialize here so that StartQuit class can be passed to timelapse thread
     # in order to change button
