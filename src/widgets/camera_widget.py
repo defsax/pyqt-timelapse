@@ -15,8 +15,8 @@ class Camera(QWidget):
   
   def __del__(self):
     print("\nrequesting camera thread close...")
-    self.th.requestInterruption()
-    self.th.wait()
+    self.thread.requestInterruption()
+    self.thread.wait()
 
 
   @pyqtSlot(QImage)
@@ -36,11 +36,6 @@ class Camera(QWidget):
     self.show()
     
   def initThread(self):
-    self.th = CameraThread(self.handle)
-    
-    # ~ if self.th.cap is None or not self.th.cap.isOpened():
-      # ~ print('Warning: unable to open video source: ', self.th.cap)
-      # ~ self.deleteLater()
-      
-    self.th.changePixmap.connect(self.setImage)
-    self.th.start() 
+    self.thread = CameraThread(self.handle)      
+    self.thread.changePixmap.connect(self.setImage)
+    self.thread.start() 
