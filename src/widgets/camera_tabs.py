@@ -26,7 +26,7 @@ class CameraTabs(QWidget):
     
     for i in range(len(cam_handles)):
       print("cam",i,"available", cam_handles[i])
-      tabs.addTab(Camera(cam_handles[i]), "camera {}".format(i+1))
+      tabs.addTab(Camera(cam_handles[i]), "Camera {}".format(i+1))
       
     self.layout.addWidget(tabs)
     self.layout.setContentsMargins(0,0,0,0)

@@ -1,40 +1,10 @@
-import cv2 as cv
 import sys
 from queue import Queue, Empty
 from PyQt5.QtWidgets import  QWidget, QLabel, QApplication
-from PyQt5.QtCore import QThread, Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap
 
-class Thread(QThread):
-  changePixmap = pyqtSignal(QImage)
-  def __init__(self, handle):
-    super(Thread, self).__init__()
-    self.handle = handle
-    # ~ self.cap = cv.VideoCapture(self.id, cv.CAP_V4L)
-
-  def run(self):     
-    while not self.isInterruptionRequested():
-      ret, frame = self.handle.read() 
-      if self.isInterruptionRequested():
-        print("cam thread interruption requested")
-        break
-        
-      if ret:        
-        # https://stackoverflow.com/a/55468544/6622587
-        rgbImage = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-        # ~ rgbImage = cv.cvtColor(frame, cv.COLOR_RGBA2GRAY)
-        h, w, ch = rgbImage.shape
-        bytesPerLine = ch * w
-        convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-        p = convertToQtFormat.scaled(640, 480, Qt.KeepAspectRatio)
-        self.changePixmap.emit(p)
-      else:
-        print("Can't receive frame (stream end?). Exiting ...")
-        break
-        
-    self.handle.release()
-    cv.destroyAllWindows()
-    print("camera thread closed. all done.")
+from threads.camera_thread import CameraThread
 
 class Camera(QWidget):
   def __init__(self, camera_handle):
@@ -66,7 +36,7 @@ class Camera(QWidget):
     self.show()
     
   def initThread(self):
-    self.th = Thread(self.handle)
+    self.th = CameraThread(self.handle)
     
     # ~ if self.th.cap is None or not self.th.cap.isOpened():
       # ~ print('Warning: unable to open video source: ', self.th.cap)
