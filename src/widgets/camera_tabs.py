@@ -11,6 +11,8 @@ from PyQt5.QtWidgets import (
 from widgets.camera_widget import Camera
 from helpers import list_ports
 
+from pydispatch import dispatcher
+
 class CameraTabs(QWidget):
   def __init__(self, cameras):
     super(CameraTabs, self).__init__()
@@ -37,6 +39,8 @@ class CameraTabs(QWidget):
     self.layout.setSpacing(10)
     self.setLayout(self.layout)
     
+    dispatcher.connect(self.change_icon, signal = "x", sender = dispatcher.Any)
+    
   def create_cams(self, cam_handles):
     for i in range(len(cam_handles)):
       self.cams.append(Camera(cam_handles[i], self.change_icon))
@@ -45,8 +49,8 @@ class CameraTabs(QWidget):
     for i, cam in enumerate(cameras):
       self.tabs.addTab(cam, self.check_icon, "Camera {}".format(i+1))
   
-  def change_icon(self, cam):
-    index = self.tabs.indexOf(cam)
+  def change_icon(self, sender):
+    index = self.tabs.indexOf(sender)
     self.tabs.setTabIcon(index, self.x_icon)
-    print("Camera disconnected", cam, index)
+    print("Camera disconnected", sender, index)
     

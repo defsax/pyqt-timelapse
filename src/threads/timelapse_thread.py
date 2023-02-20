@@ -28,8 +28,8 @@ class TimelapseThread(QThread):
     
   def setup(self, interval, duration, button, file_name, location):
     self.button = button
-    self.interval = int(interval) * 60
-    self.duration = int(duration) * 60
+    self.interval = int(interval) #* 60
+    self.duration = int(duration) #* 60
     
     print(file_name, location)
     
@@ -67,7 +67,7 @@ class TimelapseThread(QThread):
         # Capture a frame ret, img = cap.read()
         ret, frame = self.cam_handles[i].read()
         # save file
-        cv2.imwrite(self.path+'/img_'+str(count).zfill(4)+'cam_'+str(i+1).zfill(2)+'.png', frame)
+        cv2.imwrite(self.path+'/cam_'+str(i+1).zfill(2)+'_img_'+str(count).zfill(4)+'.png', frame)
         #print out
         print("cam", i+1, "picture", count, "taken")
       except:

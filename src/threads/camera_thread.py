@@ -4,6 +4,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QImage
 
+from pydispatch import dispatcher
+
 class CameraThread(QThread):
   changePixmap = pyqtSignal(QImage)
   def __init__(self, handle, parent):
@@ -30,6 +32,8 @@ class CameraThread(QThread):
       else:
         print("Can't receive frame (stream end?). Exiting ...")
         break
+
+    dispatcher.send(signal = "x", sender = self.parent)
 
     self.handle.release()
     # ~ self.parent.change_icon(self.parent)
