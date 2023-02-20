@@ -10,14 +10,9 @@ class Camera(QWidget):
   def __init__(self, camera_handle):
     super().__init__()
     self.handle = camera_handle
+    # ~ self.change_icon = change_icon
     self.initUI()
-    self.initThread()
-  
-  def __del__(self):
-    print("\nrequesting camera thread close...")
-    self.thread.requestInterruption()
-    self.thread.wait()
-
+    self.init_thread()
 
   @pyqtSlot(QImage)
   def setImage(self, image):
@@ -35,7 +30,13 @@ class Camera(QWidget):
 
     self.show()
     
-  def initThread(self):
-    self.thread = CameraThread(self.handle)      
+  def init_thread(self):
+    self.thread = CameraThread(self.handle, self)      
     self.thread.changePixmap.connect(self.setImage)
     self.thread.start() 
+
+  # explicit call vs called in the destructor
+  def stop_thread(self):
+    print("\nRequesting camera thread close...")
+    self.thread.requestInterruption()
+    self.thread.wait()

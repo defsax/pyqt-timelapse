@@ -7,57 +7,46 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QStyle
 )
-# ~ from PyQt5.QtGui import (
-  # ~ QPixmap, 
-  # ~ QIcon, 
-  # ~ QColor, 
-  # ~ QPainterPath, 
-  # ~ QPainter,
-  # ~ QBrush,
-  # ~ QPen
-# ~ )
 
 from widgets.camera_widget import Camera
 from helpers import list_ports
 
 class CameraTabs(QWidget):
-  def __init__(self, cam_handles):
+  def __init__(self, cameras):
     super(CameraTabs, self).__init__()
     
     self.layout = QVBoxLayout()
 
-    tabs = QTabWidget()
-    tabs.setTabPosition(QTabWidget.North)
+    self.tabs = QTabWidget()
+    self.tabs.setTabPosition(QTabWidget.North)
     # ~ tabs.setIconSize(QSize(20,20))
-    tabs.setMovable(True)
+    self.tabs.setMovable(True)
     
+    # create icons
     check_pixmap = QStyle.SP_DialogApplyButton
     x_pixmap = QStyle.SP_MessageBoxCritical
+    self.check_icon = self.style().standardIcon(check_pixmap)
+    self.x_icon = self.style().standardIcon(x_pixmap)
     
-    check_icon = self.style().standardIcon(check_pixmap)
-    x_icon = self.style().standardIcon(x_pixmap)
+    # add camera widget array to tab list
+    self.add_cams_to_tabs(cameras)
     
-    ##
-    cam1 = Camera(cam_handles[0])
-    tabs.addTab(cam1, check_icon, "Camera {}".format(0))
-    cam2 = Camera(cam_handles[1])
-    tabs.addTab(cam2, check_icon, "Camera {}".format(1))
-    
-    
-    ##
-    
-    # ~ for i in range(len(cam_handles)):
-      # ~ print("cam",i,"available", cam_handles[i])
-      # ~ tabs.addTab(Camera(cam_handles[i]), x_icon, "Camera {}".format(i+1))
-    
-    self.layout.addWidget(tabs)
+    # set layout and style
+    self.layout.addWidget(self.tabs)
     self.layout.setContentsMargins(0,0,0,0)
     self.layout.setSpacing(10)
     self.setLayout(self.layout)
     
-    # ~ page1 = tabs.indexOf(Camera)
-    index1 = tabs.indexOf(cam1)
-    index2 = tabs.indexOf(cam2)
-    tabs.setTabIcon(index1, x_icon)
-    # ~ page3 = tabs.findChild(QWidget, "Camera 3")
-    print(index1, index2)
+  def create_cams(self, cam_handles):
+    for i in range(len(cam_handles)):
+      self.cams.append(Camera(cam_handles[i], self.change_icon))
+  
+  def add_cams_to_tabs(self, cameras):
+    for i, cam in enumerate(cameras):
+      self.tabs.addTab(cam, self.check_icon, "Camera {}".format(i+1))
+  
+  def change_icon(self, cam):
+    index = self.tabs.indexOf(cam)
+    self.tabs.setTabIcon(index, self.x_icon)
+    print("Camera disconnected", cam, index)
+    

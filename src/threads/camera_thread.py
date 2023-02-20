@@ -6,15 +6,16 @@ from PyQt5.QtGui import QImage
 
 class CameraThread(QThread):
   changePixmap = pyqtSignal(QImage)
-  def __init__(self, handle):
+  def __init__(self, handle, parent):
     super(CameraThread, self).__init__()
     self.handle = handle
+    self.parent = parent
 
   def run(self):     
     while not self.isInterruptionRequested():
       ret, frame = self.handle.read() 
       if self.isInterruptionRequested():
-        print("cam thread interruption requested")
+        print("Cam thread interruption requested. Exiting loop.")
         break
         
       if ret:        
@@ -29,7 +30,8 @@ class CameraThread(QThread):
       else:
         print("Can't receive frame (stream end?). Exiting ...")
         break
-        
+
     self.handle.release()
+    # ~ self.parent.change_icon(self.parent)
     cv.destroyAllWindows()
-    print("camera thread closed. all done.")
+    print("Camera thread safely closed. All done!")

@@ -78,15 +78,15 @@ class TimelapseThread(QThread):
   def run(self):
     self.scheduler.run(blocking = True)
     self.button.setText("Start")
-    print("time lapse done")
+    print("Time lapse done!")
     
   def stop(self):
-    print("timelapse thread stopping...")
+    print("\nTimelapse thread stopping...")
     if self.scheduler.empty():
-      print("no items to cancel!")
+      print("No items to cancel!")
       return 
     else:
       for item in self.scheduler.queue:
-        print("cancelling item...")
+        print("Cancelling item...")
         self.scheduler.cancel(item)
-      print("items cancelled.")
+      print("Items cancelled.")
