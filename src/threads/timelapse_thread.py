@@ -31,21 +31,28 @@ class TimelapseThread(QThread):
     self.interval = int(interval) #* 60
     self.duration = int(duration) #* 60
     
-    print(file_name, location)
+    # ~ print(file_name, location)
     
     # get and format date
     start = datetime.now()
     self.date_time = start.strftime("%m-%d-%Y_%H-%M-%S")
     self.folder_name = file_name + "_" + self.date_time
-    print("date and time:", self.date_time)
+
 
     # create and name folder for round of pictures after date
-    # ~ photo_directory = "../pics/"
     photo_directory = location
     self.path = os.path.join(photo_directory, self.folder_name)
     os.makedirs(self.path)
-    print(self.path)
     
+    # create dictionary to hold cam_handle and file location
+    self.cam_folders = {}
+    
+    # create a folder for each camera
+    for i in range(len(self.cam_handles)):
+      camera_directory = "cam_" + str(i+1).zfill(2)
+      cam_path = os.path.join(self.path, camera_directory)
+      os.makedirs(cam_path)
+      self.cam_folders.update({self.cam_handles[i]: cam_path})
     
     # set up interval and duration to figure out when to schedule photos
     iterator_time = time.time()
@@ -62,12 +69,14 @@ class TimelapseThread(QThread):
     GPIO.output(14,GPIO.HIGH)
     print("\nTime: ", time.ctime())
     # loop cameras and take pictures
-    for i in range(len(self.cam_handles)):
+    # ~ for i in range(len(self.cam_handles)):
+    for i, cap in enumerate(self.cam_folders):
       try:
         # Capture a frame ret, img = cap.read()
-        ret, frame = self.cam_handles[i].read()
+        ret, frame = cap.read()
         # save file
-        cv2.imwrite(self.path+'/cam_'+str(i+1).zfill(2)+'_img_'+str(count).zfill(4)+'.png', frame)
+        # ~ cv2.imwrite(self.path+'/cam_'+str(i+1).zfill(2)+'_img_'+str(count).zfill(4)+'.png', frame)
+        cv2.imwrite(self.cam_folders[cap]+'/img_'+str(count).zfill(4)+'.png', frame)
         #print out
         print("cam", i+1, "picture", count, "taken")
       except:

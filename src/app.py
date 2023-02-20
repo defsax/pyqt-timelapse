@@ -47,8 +47,8 @@ class MainWindow(QMainWindow):
     available_ports,working_ports,non_working_ports = list_ports()
     
     # get cv handles
-    for n, cam in enumerate(working_ports):
-      cap = cv.VideoCapture(cam, cv.CAP_V4L)
+    for cam_id in working_ports:
+      cap = cv.VideoCapture(cam_id, cv.CAP_V4L)
       self.cam_handles.append(cap)
   
   def init_threads(self):
