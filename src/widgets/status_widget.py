@@ -38,6 +38,8 @@ class StatusBox(QWidget):
     self.label.setText(format_string.format(color, msg))
 
   def set_status1(self, sender):
-    # ~ format_string = '<font color="black">{0}</font>'
-    print("event status update", sender)
-    # ~ self.label.setText(format_string.format(color, msg))
+    text_color = sender["col"]
+    message = sender["msg"]
+    format_string = '<font color="{0}">{1}</font>'
+    # ~ print("event status update", sender["msg"], sender["col"])
+    self.label.setText(format_string.format(text_color, message))
