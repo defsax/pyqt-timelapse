@@ -35,7 +35,7 @@ class CameraThread(QThread):
 
     # send disconnect / close signal (to camera tabs)
     dispatcher.send(signal = "x", sender = self.parent)
-    # ~  dispatcher.send(signal = "status_update", sender = {"msg":"here is msg", "col": "blue"} )
+    # ~ dispatcher.send(signal = "status_update", sender = {"msg":"here is msg", "col": "blue"} )
 
     self.handle.release()
     # ~ self.parent.change_icon(self.parent)
