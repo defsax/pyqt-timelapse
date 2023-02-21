@@ -35,8 +35,8 @@ class TimelapseThread(QThread):
     
     # get and format date
     start = datetime.now()
-    self.date_time = start.strftime("%m-%d-%Y_%H-%M-%S")
-    self.folder_name = file_name + "_" + self.date_time
+    self.folder_time = start.strftime("%m-%d-%Y_%H-%M-%S")
+    self.folder_name = file_name + "_" + self.folder_time
 
 
     # create and name folder for round of pictures after date
@@ -71,12 +71,14 @@ class TimelapseThread(QThread):
     # loop cameras and take pictures
     # ~ for i in range(len(self.cam_handles)):
     for i, cap in enumerate(self.cam_folders):
+      start = datetime.now()
+      date_time = start.strftime("%m-%d-%Y_%H-%M-%S")
       try:
         # Capture a frame ret, img = cap.read()
         ret, frame = cap.read()
         # save file
         # ~ cv2.imwrite(self.path+'/cam_'+str(i+1).zfill(2)+'_img_'+str(count).zfill(4)+'.png', frame)
-        cv2.imwrite(self.cam_folders[cap]+'/img_'+str(count).zfill(4)+'.png', frame)
+        cv2.imwrite(self.cam_folders[cap]+'/'+date_time+'_img'+str(count).zfill(4)+'.png', frame)
         #print out
         print("cam", i+1, "picture", count, "taken")
       except:
@@ -88,6 +90,10 @@ class TimelapseThread(QThread):
     self.scheduler.run(blocking = True)
     self.button.setText("Start")
     print("Time lapse done!")
+    
+    # emit finished signal to status box
+    
+    # run create video function and pass file path(s)
     
   def stop(self):
     print("\nTimelapse thread stopping...")
