@@ -28,24 +28,31 @@ class TimelapseThread(QThread):
     
   def setup(self, interval, duration, button, file_name, location):
     self.button = button
-    self.interval = int(interval) * 60
-    self.duration = int(duration) * 60
+    self.interval = int(interval) #* 60
+    self.duration = int(duration) #* 60
     
-    print(file_name, location)
+    # ~ print(file_name, location)
     
     # get and format date
     start = datetime.now()
-    self.date_time = start.strftime("%m-%d-%Y_%H-%M-%S")
-    self.folder_name = file_name + "_" + self.date_time
-    print("date and time:", self.date_time)
+    self.folder_time = start.strftime("%m-%d-%Y_%H-%M-%S")
+    self.folder_name = file_name + "_" + self.folder_time
+
 
     # create and name folder for round of pictures after date
-    # ~ photo_directory = "../pics/"
     photo_directory = location
     self.path = os.path.join(photo_directory, self.folder_name)
     os.makedirs(self.path)
-    print(self.path)
     
+    # create dictionary to hold cam_handle and file location
+    self.cam_folders = {}
+    
+    # create a folder for each camera
+    for i in range(len(self.cam_handles)):
+      camera_directory = "cam_" + str(i+1).zfill(2)
+      cam_path = os.path.join(self.path, camera_directory)
+      os.makedirs(cam_path)
+      self.cam_folders.update({self.cam_handles[i]: cam_path})
     
     # set up interval and duration to figure out when to schedule photos
     iterator_time = time.time()
@@ -59,34 +66,44 @@ class TimelapseThread(QThread):
       iterator_time += self.interval
   
   def take_pictures(self, count):
+    # turn on rpi gpio pin 14
     GPIO.output(14,GPIO.HIGH)
+    
     print("\nTime: ", time.ctime())
+    
     # loop cameras and take pictures
-    for i in range(len(self.cam_handles)):
+    for i, cap in enumerate(self.cam_folders):
+      start = datetime.now()
+      date_time = start.strftime("%m-%d-%Y_%H-%M-%S")
       try:
         # Capture a frame ret, img = cap.read()
-        ret, frame = self.cam_handles[i].read()
+        ret, frame = cap.read()
         # save file
-        cv2.imwrite(self.path+'/img_'+str(count).zfill(4)+'cam_'+str(i+1).zfill(2)+'.png', frame)
+        cv2.imwrite(self.cam_folders[cap]+'/'+date_time+'_img'+str(count).zfill(4)+'.png', frame)
         #print out
         print("cam", i+1, "picture", count, "taken")
       except:
         print("error capturing cam", i+1, "picture", count)
       
+    # turn off rpi gpio pin 14
     GPIO.output(14,GPIO.LOW)
 
   def run(self):
     self.scheduler.run(blocking = True)
     self.button.setText("Start")
-    print("time lapse done")
+    print("Time lapse done!")
+    
+    # emit finished signal to status box
+    
+    # run create video function and pass file path(s)
     
   def stop(self):
-    print("timelapse thread stopping...")
+    print("\nTimelapse thread stopping...")
     if self.scheduler.empty():
-      print("no items to cancel!")
+      print("No items to cancel!")
       return 
     else:
       for item in self.scheduler.queue:
-        print("cancelling item...")
+        print("Cancelling item...")
         self.scheduler.cancel(item)
-      print("items cancelled.")
+      print("Items cancelled.")

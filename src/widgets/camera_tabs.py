@@ -1,34 +1,57 @@
 import sys
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import (
     QTabWidget,
     QWidget,
-    QVBoxLayout
+    QVBoxLayout,
+    QStyle
 )
 
 from widgets.camera_widget import Camera
 from helpers import list_ports
 
+from pydispatch import dispatcher
+
 class CameraTabs(QWidget):
-  def __init__(self, cam_handles):
+  def __init__(self, cameras):
     super(CameraTabs, self).__init__()
+    
     self.layout = QVBoxLayout()
 
-    tabs = QTabWidget()
-    tabs.setTabPosition(QTabWidget.North)
-    tabs.setMovable(True)
+    self.tabs = QTabWidget()
+    self.tabs.setTabPosition(QTabWidget.North)
+    # ~ tabs.setIconSize(QSize(20,20))
+    self.tabs.setMovable(True)
     
-    # auto detect cameras and add to list
-    # ~ available_ports,working_ports,non_working_ports = list_ports()
-    # ~ for n, cam in enumerate(working_ports):
-      # ~ tabs.addTab(Camera(cam), "camera {}".format(n+1))
+    # create icons
+    check_pixmap = QStyle.SP_DialogApplyButton
+    x_pixmap = QStyle.SP_MessageBoxCritical
+    self.check_icon = self.style().standardIcon(check_pixmap)
+    self.x_icon = self.style().standardIcon(x_pixmap)
     
-    for i in range(len(cam_handles)):
-      print("cam",i,"available", cam_handles[i])
-      tabs.addTab(Camera(cam_handles[i]), "camera {}".format(i+1))
-      
-    self.layout.addWidget(tabs)
+    # add camera widget array to tab list
+    self.add_cams_to_tabs(cameras)
+    
+    # set layout and style
+    self.layout.addWidget(self.tabs)
     self.layout.setContentsMargins(0,0,0,0)
     self.layout.setSpacing(10)
     self.setLayout(self.layout)
+    
+    # function to run when signal is received from cam disconnect
+    dispatcher.connect(self.change_icon, signal = "x", sender = dispatcher.Any)
+    
+  def create_cams(self, cam_handles):
+    for i in range(len(cam_handles)):
+      self.cams.append(Camera(cam_handles[i], self.change_icon))
+  
+  def add_cams_to_tabs(self, cameras):
+    for i, cam in enumerate(cameras):
+      self.tabs.addTab(cam, self.check_icon, "Camera {}".format(i+1))
+  
+  def change_icon(self, sender):
+    index = self.tabs.indexOf(sender)
+    self.tabs.setTabIcon(index, self.x_icon)
+    print("Camera disconnected", sender, index)
+    

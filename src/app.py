@@ -22,7 +22,10 @@ from widgets.filename_widget import FileNameBox
 from widgets.location_widget import LocationOptions
 from widgets.start_quit_widget import StartQuit
 from widgets.status_widget import StatusBox
+
 from threads.timelapse_thread import TimelapseThread
+from threads.camera_thread_manager import CameraThreadManager
+
 from helpers import list_ports
 
 
@@ -31,31 +34,34 @@ class MainWindow(QMainWindow):
   def __init__(self):
     super(MainWindow, self).__init__()
     self.cam_handles = []
-    self.init_cameras()
+    self.get_camera_handles()
     self.init_threads()
     self.init_options()
     self.init_ui()
       
   def __del__(self):
-    print("app unwind")
+    print("\nApp unwind.")
     
-  def init_cameras(self):
+  def get_camera_handles(self):
     # get available cameras
     available_ports,working_ports,non_working_ports = list_ports()
     
     # get cv handles
-    for n, cam in enumerate(working_ports):
-      cap = cv.VideoCapture(cam, cv.CAP_V4L)
+    for cam_id in working_ports:
+      cap = cv.VideoCapture(cam_id, cv.CAP_V4L)
       self.cam_handles.append(cap)
   
   def init_threads(self):
     # pass cv handles to cam tabs and down to camera class / thread
-    self.cam_tabs = CameraTabs(self.cam_handles)
+    self.camera_manager = CameraThreadManager(self.cam_handles)
     
     # pass cv handles to timelapse thread
     self.timelapse_thread = TimelapseThread(self.cam_handles)
   
   def init_options(self):
+    # set up cam_tabs by passing camera list
+    self.cam_tabs = CameraTabs(self.camera_manager.cams)
+    
     # set up which intervals are wanted (minutes)
     self.intervals = IntervalOptions(["1", "5", "30", "60", "180"])
     
@@ -139,12 +145,17 @@ class MainWindow(QMainWindow):
       self.start_quit.start_btn.setEnabled(False)
       self.status_box.set_status("Please enter file name and location.", "Black")
     
-if __name__ == "__main__":
-  QtGui.QGuiApplication(sys.argv)
-  # ~ os.environ["QT_IM_MODULE"] = "qtvirtualkeyboard"
-  app = QApplication(sys.argv)
-  window = MainWindow()
-  window.show()
-  # ~ os.environ["QT_IM_MODULE"] = "qtvirtualkeyboard"
+  def handle_close(self):
+    self.stop_timelapse()
+    # important!
+    self.camera_manager.stop()
+    self.close()
+    
+# ~ if __name__ == "__main__":
+app = QApplication(sys.argv)
+window = MainWindow()
+window.show()
+# ~ os.environ["QT_IM_MODULE"] = "qtvirtualkeyboard"
 
-  sys.exit(app.exec())
+sys.exit(app.exec())
+

@@ -21,7 +21,7 @@ class StartQuit(QWidget):
     self.start_btn.setEnabled(False)
     
     quit_btn = QPushButton("Quit", self)
-    quit_btn.clicked.connect(self.handle_close)
+    quit_btn.clicked.connect(self.parent.handle_close)
     layout.addWidget(quit_btn)
     
     self.setLayout(layout)
@@ -35,7 +35,3 @@ class StartQuit(QWidget):
       else:
         self.parent.stop_timelapse()
         self.start_btn.setText("Start")
-    
-  def handle_close(self):
-    self.parent.stop_timelapse()
-    sys.exit()
