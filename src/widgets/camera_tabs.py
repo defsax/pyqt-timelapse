@@ -39,6 +39,7 @@ class CameraTabs(QWidget):
     self.layout.setSpacing(10)
     self.setLayout(self.layout)
     
+    # function to run when signal is received from cam disconnect
     dispatcher.connect(self.change_icon, signal = "x", sender = dispatcher.Any)
     
   def create_cams(self, cam_handles):

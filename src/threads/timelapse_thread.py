@@ -66,10 +66,12 @@ class TimelapseThread(QThread):
       iterator_time += self.interval
   
   def take_pictures(self, count):
+    # turn on rpi gpio pin 14
     GPIO.output(14,GPIO.HIGH)
+    
     print("\nTime: ", time.ctime())
+    
     # loop cameras and take pictures
-    # ~ for i in range(len(self.cam_handles)):
     for i, cap in enumerate(self.cam_folders):
       start = datetime.now()
       date_time = start.strftime("%m-%d-%Y_%H-%M-%S")
@@ -77,13 +79,13 @@ class TimelapseThread(QThread):
         # Capture a frame ret, img = cap.read()
         ret, frame = cap.read()
         # save file
-        # ~ cv2.imwrite(self.path+'/cam_'+str(i+1).zfill(2)+'_img_'+str(count).zfill(4)+'.png', frame)
         cv2.imwrite(self.cam_folders[cap]+'/'+date_time+'_img'+str(count).zfill(4)+'.png', frame)
         #print out
         print("cam", i+1, "picture", count, "taken")
       except:
         print("error capturing cam", i+1, "picture", count)
       
+    # turn off rpi gpio pin 14
     GPIO.output(14,GPIO.LOW)
 
   def run(self):

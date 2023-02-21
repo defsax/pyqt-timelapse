@@ -33,7 +33,9 @@ class CameraThread(QThread):
         print("Can't receive frame (stream end?). Exiting ...")
         break
 
+    # send disconnect / close signal (to camera tabs)
     dispatcher.send(signal = "x", sender = self.parent)
+    dispatcher.send(signal = "status_update", sender = "Here is tegh mesage!s" )
 
     self.handle.release()
     # ~ self.parent.change_icon(self.parent)
