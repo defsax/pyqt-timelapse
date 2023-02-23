@@ -7,6 +7,8 @@ from PyQt5.QtGui import QImage, QPixmap
 from threads.camera_thread import CameraThread
 from pydispatch import dispatcher
 
+from helpers import set_msg
+
 class Camera(QWidget):
   def __init__(self, camera_handle):
     super().__init__()
@@ -19,10 +21,6 @@ class Camera(QWidget):
   @pyqtSlot(QImage)
   def set_img(self, image):
     self.label.setPixmap(QPixmap.fromImage(image))
-
-  @pyqtSlot(str, str)
-  def set_msg(self, msg, col):
-    dispatcher.send(signal = "status_update", sender = {"msg":msg, "col": col} )
 
   def initUI(self):
     # self.setWindowTitle(self.title)
@@ -39,7 +37,7 @@ class Camera(QWidget):
   def init_thread(self):
     self.thread = CameraThread(self.handle, self)      
     self.thread.changePixmap.connect(self.set_img)
-    self.thread.send_msg.connect(self.set_msg)
+    self.thread.send_msg.connect(set_msg)
     self.thread.start() 
 
   # explicit call vs called in the destructor

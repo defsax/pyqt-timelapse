@@ -4,6 +4,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QImage
 
+from pydispatch import dispatcher
+
 class CameraThread(QThread):
   # set up pyqtsignals
   changePixmap = pyqtSignal(QImage)
@@ -37,7 +39,7 @@ class CameraThread(QThread):
         break
 
     # send disconnect / close signal (to camera tabs)
-    # ~ dispatcher.send(signal = "x", sender = self.parent)
+    dispatcher.send(signal = "cam_disconnect", sender = self.parent)
     self.send_msg.emit("Camera disconnect", "red")
 
     self.handle.release()

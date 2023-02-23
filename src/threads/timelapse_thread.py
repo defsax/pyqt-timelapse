@@ -3,18 +3,27 @@ import numpy as np
 import cv2
 import os
 import sched, time
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, pyqtSignal
 
-import RPi.GPIO as GPIO
+try:
+  import RPi.GPIO as GPIO
+except ImportError:
+  print("Not running on raspberry pi.")
 
 class TimelapseThread(QThread):
+  send_msg = pyqtSignal(str, str)
+  
   def __init__(self, cam_handles):
     super(TimelapseThread, self).__init__()
     
-    # init gpio pins on the pi
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
-    GPIO.setup(14,GPIO.OUT)
+    self.is_rpi = os.uname()[1] == "raspberrypi"
+    
+    if self.is_rpi:
+      print('raspberry pi:',self.is_rpi)
+      # init gpio pins on the pi
+      GPIO.setmode(GPIO.BCM)
+      GPIO.setwarnings(False)
+      GPIO.setup(14,GPIO.OUT)
     
     """
       VideoCapture object is created in app.py py and shared between 
@@ -66,8 +75,9 @@ class TimelapseThread(QThread):
       iterator_time += self.interval
   
   def take_pictures(self, count):
-    # turn on rpi gpio pin 14
-    GPIO.output(14,GPIO.HIGH)
+    if self.is_rpi:
+      # turn on rpi gpio pin 14
+      GPIO.output(14,GPIO.HIGH)
     
     print("\nTime: ", time.ctime())
     
@@ -78,15 +88,23 @@ class TimelapseThread(QThread):
       try:
         # Capture a frame ret, img = cap.read()
         ret, frame = cap.read()
+        
         # save file
         cv2.imwrite(self.cam_folders[cap]+'/'+date_time+'_img'+str(count).zfill(4)+'.png', frame)
-        #print out
+        
+        # print out, send to status box
         print("cam", i+1, "picture", count, "taken")
+        format_string = "Camera {0} picture {1} taken"
+        self.send_msg.emit(format_string.format(i+1, count), "Black")
+      
       except:
         print("error capturing cam", i+1, "picture", count)
+        format_string = "Error: camera {0} picture {1} not captured!"
+        self.send_msg.emit(format_string.format(i+1, count), "Red")
       
-    # turn off rpi gpio pin 14
-    GPIO.output(14,GPIO.LOW)
+    if self.is_rpi:
+      # turn off rpi gpio pin 14
+      GPIO.output(14,GPIO.LOW)
 
   def run(self):
     self.scheduler.run(blocking = True)
@@ -94,6 +112,7 @@ class TimelapseThread(QThread):
     print("Time lapse done!")
     
     # emit finished signal to status box
+    self.send_msg.emit("Time lapse done!", "Green")
     
     # run create video function and pass file path(s)
     

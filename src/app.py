@@ -2,6 +2,8 @@ import os
 import sys
 import time
 import cv2 as cv
+from pyfirmata import Arduino
+from PyQt5.QtCore import Qt
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (
   QApplication, 
@@ -13,7 +15,6 @@ from PyQt5.QtWidgets import (
   QPushButton,
   QComboBox
 )
-from PyQt5.QtCore import Qt
 
 from widgets.camera_tabs import CameraTabs
 from widgets.interval_widget import IntervalOptions
@@ -25,8 +26,9 @@ from widgets.status_widget import StatusBox
 
 from threads.timelapse_thread import TimelapseThread
 from threads.camera_thread_manager import CameraThreadManager
+from threads.arduino_thread import ArduinoThread
 
-from helpers import list_ports
+from helpers import list_ports, set_msg
 
 
 class MainWindow(QMainWindow):
@@ -38,6 +40,8 @@ class MainWindow(QMainWindow):
     self.init_threads()
     self.init_options()
     self.init_ui()
+    
+
       
   def __del__(self):
     print("\nApp unwind.")
@@ -57,7 +61,19 @@ class MainWindow(QMainWindow):
     
     # pass cv handles to timelapse thread
     self.timelapse_thread = TimelapseThread(self.cam_handles)
+    self.timelapse_thread.send_msg.connect(set_msg)
     
+    # set up arduino
+    try:
+      board = Arduino('/dev/ttyACM0')
+      print(board)
+      self.arduino_thread = ArduinoThread()
+      print("arduino thread created")
+      self.arduino_thead.start()
+      print("arduino thread started")
+    except:
+      print("No arduino connected")
+      
   
   def init_options(self):
     # set up cam_tabs by passing camera list

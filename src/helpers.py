@@ -1,3 +1,5 @@
+from PyQt5.QtCore import pyqtSlot
+from pydispatch import dispatcher
 import cv2
 # ~ import warnings
     
@@ -32,3 +34,9 @@ def list_ports():
         available_ports.append(dev_port)
     dev_port +=1
   return available_ports,working_ports,non_working_ports
+
+
+# dispatch message emitted from thread
+@pyqtSlot(str, str)
+def set_msg(msg, col):
+  dispatcher.send(signal = "status_update", sender = {"msg":msg, "col": col} )
