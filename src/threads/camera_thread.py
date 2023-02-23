@@ -4,10 +4,11 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QImage
 
-from pydispatch import dispatcher
-
 class CameraThread(QThread):
+  # set up pyqtsignals
   changePixmap = pyqtSignal(QImage)
+  send_msg = pyqtSignal(str, str)
+  
   def __init__(self, handle, parent):
     super(CameraThread, self).__init__()
     self.handle = handle
@@ -28,14 +29,16 @@ class CameraThread(QThread):
         bytesPerLine = ch * w
         convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
         p = convertToQtFormat.scaled(640, 480, Qt.KeepAspectRatio)
+        
+        # get data out of thread safely
         self.changePixmap.emit(p)
       else:
         print("Can't receive frame (stream end?). Exiting ...")
         break
 
     # send disconnect / close signal (to camera tabs)
-    dispatcher.send(signal = "x", sender = self.parent)
-    # ~ dispatcher.send(signal = "status_update", sender = {"msg":"here is msg", "col": "blue"} )
+    # ~ dispatcher.send(signal = "x", sender = self.parent)
+    self.send_msg.emit("Camera disconnect", "red")
 
     self.handle.release()
     # ~ self.parent.change_icon(self.parent)

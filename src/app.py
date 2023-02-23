@@ -57,6 +57,7 @@ class MainWindow(QMainWindow):
     
     # pass cv handles to timelapse thread
     self.timelapse_thread = TimelapseThread(self.cam_handles)
+    
   
   def init_options(self):
     # set up cam_tabs by passing camera list
