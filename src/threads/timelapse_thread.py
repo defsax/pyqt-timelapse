@@ -39,8 +39,8 @@ class TimelapseThread(QThread):
     
   def setup(self, interval, duration, button, file_name, location):
     self.button = button
-    self.interval = int(interval) #* 60
-    self.duration = int(duration) #* 60
+    self.interval = int(interval) * 60
+    self.duration = int(duration) * 60
     
     # ~ print(file_name, location)
     
