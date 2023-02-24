@@ -1,6 +1,7 @@
 import sys
 import cv2 as cv
 from pyfirmata import Arduino
+import time
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -8,6 +9,8 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
 )
+from PyQt5.QtSerialPort import QSerialPort
+from PyQt5.QtCore import pyqtSlot, QIODevice
 
 from widgets.camera_tabs import CameraTabs
 from widgets.interval_widget import IntervalOptions
@@ -19,9 +22,9 @@ from widgets.status_widget import StatusBox
 
 from threads.timelapse_thread import TimelapseThread
 from threads.camera_thread_manager import CameraThreadManager
-from threads.arduino_thread import ArduinoThread
+from threads.arduino_thread import ArduinoHandler
 
-from helpers import list_ports, set_msg
+from helpers import list_cameras, list_serial_devices, set_msg
 
 
 class MainWindow(QMainWindow):
@@ -38,7 +41,7 @@ class MainWindow(QMainWindow):
 
     def get_camera_handles(self):
         # get available cameras
-        available_ports, working_ports, non_working_ports = list_ports()
+        available_ports, working_ports, non_working_ports = list_cameras()
 
         # get cv handles
         for cam_id in working_ports:
@@ -55,12 +58,10 @@ class MainWindow(QMainWindow):
 
         # set up arduino
         try:
-            board = Arduino("/dev/ttyACM0")
-            print(board)
-            self.arduino_thread = ArduinoThread()
-            print("arduino thread created")
-            self.arduino_thead.start()
-            print("arduino thread started")
+            device_list = list_serial_devices()
+            self.sensors = []
+            for device in device_list:
+                self.sensors.append(ArduinoHandler(device))
         except:
             print("No arduino connected")
 

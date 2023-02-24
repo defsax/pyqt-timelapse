@@ -1,17 +1,27 @@
-from PyQt5.QtCore import QThread, pyqtSignal
-from pyfirmata import Arduino, util
+from PyQt5.QtWidgets import QWidget
+from PyQt5.QtCore import pyqtSlot, QIODevice
+from PyQt5.QtSerialPort import QSerialPort
 
-# https://pypi.org/project/pyFirmata/
 
-class ArduinoThread(QThread):
-  def __init__(self, board):
-    super(ArduinoThread, self).__init__()
-    # ~ self.board = board      
-    
-  def run(self): 
-    print("arduino thread started")
-    # ~ it = util.Iterator(self.board)
-    # ~ it.start()
-    # ~ print("iterator started")
-    # ~ self.board.analog[0].enable_reporting()
-    # ~ self.board.analog[0].read()
+
+class ArduinoHandler(QWidget):
+    def __init__(self, port):
+        super(ArduinoHandler, self).__init__()
+        print(str(port))
+        self.port = port
+        self.serial = QSerialPort(
+            port,
+            baudRate = QSerialPort.Baud9600,
+            readyRead = self.receive
+        )
+        self.serial.open(QIODevice.ReadWrite)
+
+    @pyqtSlot()
+    def receive(self):
+        while self.serial.canReadLine():
+            text = self.serial.readLine().data().decode()
+            text = text.rstrip('\r\n')
+            # ~ self.output_te.append(text)
+            rh = text.split(",")[0]
+            t = text.split(",")[1]
+            print(self.port +"\ttemp: "+ t +"\trh: "+rh) 

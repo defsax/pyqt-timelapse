@@ -9,8 +9,6 @@ from PyQt5.QtWidgets import (
 )
 
 from widgets.camera_widget import Camera
-from helpers import list_ports
-
 from pydispatch import dispatcher
 
 class CameraTabs(QWidget):

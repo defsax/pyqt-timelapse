@@ -1,9 +1,11 @@
 from PyQt5.QtCore import pyqtSlot
 from pydispatch import dispatcher
 import cv2
+import serial
+import glob
 # ~ import warnings
     
-def list_ports():
+def list_cameras():
   """
   Test the ports and returns a tuple with the available ports and the ones that are working.
   """
@@ -35,8 +37,22 @@ def list_ports():
     dev_port +=1
   return available_ports,working_ports,non_working_ports
 
+def list_serial_devices():
+    ports = glob.glob('/dev/ttyACM[0-9]*')
+    res = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            res.append(port)
+        except:
+            pass
+    return res
 
 # dispatch message emitted from thread
 @pyqtSlot(str, str)
 def set_msg(msg, col):
   dispatcher.send(signal = "status_update", sender = {"msg":msg, "col": col} )
+
+
+
