@@ -56,15 +56,15 @@ class MainWindow(QMainWindow):
         self.timelapse_thread = TimelapseThread(self.cam_handles)
         self.timelapse_thread.send_msg.connect(set_msg)
 
-        # set up arduino
-        try:
-            device_list = list_serial_devices()
-            self.sensors = []
+        # set up arduinos
+        device_list = list_serial_devices()
+        self.sensors = []
+        if getattr(device_list, 'size', len(device_list)):
             for device in device_list:
                 self.sensors.append(ArduinoHandler(device))
-        except:
-            print("No arduino connected")
-
+        else: 
+            print("No arduino(s) connected")
+            
     def init_options(self):
         # set up cam_tabs by passing camera list
         self.cam_tabs = CameraTabs(self.camera_manager.cams)

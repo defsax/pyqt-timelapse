@@ -13,20 +13,26 @@ class StatusBox(QWidget):
     
     layout = QVBoxLayout()
     
-    self.label = QLabel(default_msg)
-    font = self.label.font()
-    font.setPointSize(16)
+    self.status = QLabel("hi")
+    font = self.status.font()
+    font.setPointSize(10)
+    self.status.setFont(font)
     
-    self.label.setFont(font)
+    self.message = QLabel(default_msg)
+    font = self.message.font()
+    font.setPointSize(16)
+    self.message.setFont(font)
+    
     # ~ self.label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-    self.label.setScaledContents(True)
+    self.message.setScaledContents(True)
     
     # ~ self.setAutoFillBackground(True)
     # ~ pal = self.palette()
     # ~ pal.setColor(QPalette.Window, QColor("red"))
     # ~ self.setPalette(pal)
     
-    layout.addWidget(self.label)
+    layout.addWidget(self.status)
+    layout.addWidget(self.message)
     layout.setAlignment(Qt.AlignBottom)
     
     self.setLayout(layout)
@@ -35,11 +41,11 @@ class StatusBox(QWidget):
 
   def set_status(self, msg, color="Black"):
     format_string = '<font color="{0}">{1}</font>'
-    self.label.setText(format_string.format(color, msg))
+    self.message.setText(format_string.format(color, msg))
 
   def set_status1(self, sender):
     text_color = sender["col"]
     message = sender["msg"]
     format_string = '<font color="{0}">{1}</font>'
     # ~ print("event status update", sender["msg"], sender["col"])
-    self.label.setText(format_string.format(text_color, message))
+    self.message.setText(format_string.format(text_color, message))
