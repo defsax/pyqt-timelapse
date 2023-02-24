@@ -14,7 +14,7 @@ class TimelapseThread(QThread):
   set_msg = pyqtSignal(str, str)
   set_status = pyqtSignal(str, str)
   
-  def __init__(self, cam_handles):
+  def __init__(self, cam_handles, sensors):
     super(TimelapseThread, self).__init__()
     
     self.is_rpi = os.uname()[1] == "raspberrypi"
@@ -34,6 +34,7 @@ class TimelapseThread(QThread):
     """
   
     self.cam_handles = cam_handles
+    self.sensors = sensors
     self.scheduler = sched.scheduler(time.time, time.sleep)
     
   def setup(self, interval, duration, button, file_name, location):
@@ -69,10 +70,19 @@ class TimelapseThread(QThread):
     end_time = time.time() + self.duration
     self.count = 0
     
+    # set up data file
+    try:
+      with open(self.path + "/data.txt", "a") as f:
+        f.write("time,humidity,temperature,image_id\n")
+        f.close()
+    except:
+      print("write setup error")
+    
     # register events from start to end at designated intervals and duration
     while iterator_time < end_time:
       self.count += 1
       self.scheduler.enterabs(iterator_time, 1, self.take_pictures, argument=(self.count,))
+      self.scheduler.enterabs(iterator_time, 2, self.log_data, argument=(self.count,))
       iterator_time += self.interval
   
   def take_pictures(self, count):
@@ -81,8 +91,6 @@ class TimelapseThread(QThread):
       GPIO.output(14,GPIO.HIGH)
     
     print("\nTime: ", time.ctime())
-    
-    # log temp and rh for each sensor
     
     # loop cameras and take pictures
     for i, cap in enumerate(self.cam_folders):
@@ -108,7 +116,24 @@ class TimelapseThread(QThread):
     if self.is_rpi:
       # turn off rpi gpio pin 14
       GPIO.output(14,GPIO.LOW)
-
+      
+  def log_data(self, count):
+      # log temp and rh for each sensor          
+      for i, sensor in enumerate(self.sensors):
+          rh, temp = sensor.get_data()
+          print("logging:", temp, rh)
+          try:
+              start = datetime.now()
+              date_time = start.strftime("%m-%d-%Y_%H-%M-%S")
+              print(self.path)
+              with open(self.path + "/data.txt", "a") as f:
+                  f.write(date_time + ",")
+                  f.write(rh + ",")
+                  f.write(temp + ",")
+                  f.write("img" + str(count).zfill(4)+".png\n")
+                  f.close()
+          except:
+            print("error")
   def run(self):
     self.scheduler.run(blocking = True)
     self.button.setText("Start")

@@ -49,14 +49,6 @@ class MainWindow(QMainWindow):
             self.cam_handles.append(cap)
 
     def init_threads(self):
-        # pass cv handles to cam tabs and down to camera class / thread
-        self.camera_manager = CameraThreadManager(self.cam_handles)
-
-        # pass cv handles to timelapse thread
-        self.timelapse_thread = TimelapseThread(self.cam_handles)
-        self.timelapse_thread.set_msg.connect(set_msg)
-        self.timelapse_thread.set_status.connect(set_status)
-
         # set up arduinos
         device_list = list_serial_devices()
         self.sensors = []
@@ -65,6 +57,14 @@ class MainWindow(QMainWindow):
                 self.sensors.append(ArduinoHandler(device))
         else: 
             print("No arduino(s) connected")
+            
+        # pass cv handles to cam tabs and down to camera class / thread
+        self.camera_manager = CameraThreadManager(self.cam_handles)
+
+        # pass cv handles to timelapse thread
+        self.timelapse_thread = TimelapseThread(self.cam_handles, self.sensors)
+        self.timelapse_thread.set_msg.connect(set_msg)
+        self.timelapse_thread.set_status.connect(set_status)
             
     def init_options(self):
         # set up cam_tabs by passing camera list
