@@ -19,9 +19,14 @@ class ArduinoHandler(QWidget):
     @pyqtSlot()
     def receive(self):
         while self.serial.canReadLine():
-            text = self.serial.readLine().data().decode()
-            text = text.rstrip('\r\n')
-            # ~ self.output_te.append(text)
-            rh = text.split(",")[0]
-            t = text.split(",")[1]
-            print(self.port +"\ttemp: "+ t +"\trh: "+rh) 
+            try:
+                text = self.serial.readLine().data().decode()
+                text = text.rstrip('\r\n')
+                # ~ self.output_te.append(text)
+                rh = text.split(",")[0]
+                t = text.split(",")[1]
+                print(self.port +"\ttemp: "+ t +"\trh: "+rh) 
+            except UnicodeDecodeError:
+                print("UnicodeDecodeError")
+            except:
+                print("Other error")

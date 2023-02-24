@@ -11,7 +11,8 @@ except ImportError:
   print("Not running on raspberry pi.")
 
 class TimelapseThread(QThread):
-  send_msg = pyqtSignal(str, str)
+  set_msg = pyqtSignal(str, str)
+  set_status = pyqtSignal(str, str)
   
   def __init__(self, cam_handles):
     super(TimelapseThread, self).__init__()
@@ -81,6 +82,8 @@ class TimelapseThread(QThread):
     
     print("\nTime: ", time.ctime())
     
+    # log temp and rh for each sensor
+    
     # loop cameras and take pictures
     for i, cap in enumerate(self.cam_folders):
       start = datetime.now()
@@ -95,12 +98,12 @@ class TimelapseThread(QThread):
         # print out, send to status box
         print("cam", i+1, "picture", count, "taken")
         format_string = "Camera {0} picture {1} taken"
-        self.send_msg.emit(format_string.format(i+1, count), "Black")
+        self.set_msg.emit(format_string.format(i+1, count), "Black")
       
       except:
         print("error capturing cam", i+1, "picture", count)
         format_string = "Error: camera {0} picture {1} not captured!"
-        self.send_msg.emit(format_string.format(i+1, count), "Red")
+        self.set_msg.emit(format_string.format(i+1, count), "Red")
       
     if self.is_rpi:
       # turn off rpi gpio pin 14
@@ -112,7 +115,8 @@ class TimelapseThread(QThread):
     print("Time lapse done!")
     
     # emit finished signal to status box
-    self.send_msg.emit("Time lapse done!", "Green")
+    self.set_msg.emit("Time lapse done!", "Green")
+    self.set_status.emit("Ready...", "Blue")
     
     # run create video function and pass file path(s)
     

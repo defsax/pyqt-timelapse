@@ -52,7 +52,8 @@ def list_serial_devices():
 # dispatch message emitted from thread
 @pyqtSlot(str, str)
 def set_msg(msg, col):
-  dispatcher.send(signal = "status_update", sender = {"msg":msg, "col": col} )
+  dispatcher.send(signal = "message_update", sender = {"msg":msg, "col": col} )
 
-
-
+@pyqtSlot(str, str)
+def set_status(status, col):
+  dispatcher.send(signal = "status_update", sender = {"status":status, "col": col} )

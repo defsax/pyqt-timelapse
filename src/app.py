@@ -24,7 +24,7 @@ from threads.timelapse_thread import TimelapseThread
 from threads.camera_thread_manager import CameraThreadManager
 from threads.arduino_thread import ArduinoHandler
 
-from helpers import list_cameras, list_serial_devices, set_msg
+from helpers import list_cameras, list_serial_devices, set_msg, set_status
 
 
 class MainWindow(QMainWindow):
@@ -54,7 +54,8 @@ class MainWindow(QMainWindow):
 
         # pass cv handles to timelapse thread
         self.timelapse_thread = TimelapseThread(self.cam_handles)
-        self.timelapse_thread.send_msg.connect(set_msg)
+        self.timelapse_thread.set_msg.connect(set_msg)
+        self.timelapse_thread.set_status.connect(set_status)
 
         # set up arduinos
         device_list = list_serial_devices()
@@ -123,7 +124,7 @@ class MainWindow(QMainWindow):
 
     def start_timelapse(self):
         # set widgets to disabled
-        self.status_box.set_status("Started", "Green")
+        set_status("Running...", "Green")
         print(
             "Start",
             self.intervals.choice,
@@ -148,16 +149,18 @@ class MainWindow(QMainWindow):
 
     def stop_timelapse(self):
         print("Stop")
-        self.status_box.set_status("Ready", "Blue")
+        set_status("Ready...", "Blue")
         self.timelapse_thread.stop()
 
     def check_start_enable(self):
         if not self.pics_location.filepath == "" and self.file_name.text_box.text():
             self.start_quit.start_btn.setEnabled(True)
-            self.status_box.set_status("Ready", "Blue")
+            set_msg("", "Black")
+            set_status("Ready...", "Blue")
         else:
             self.start_quit.start_btn.setEnabled(False)
-            self.status_box.set_status("Please enter file name and location.", "Black")
+            set_msg("Please enter file name and location.", "Black")
+            set_status("Waiting...", "orange")
 
     def handle_close(self):
         self.stop_timelapse()

@@ -25,6 +25,7 @@ class CameraTabs(QWidget):
     # create icons
     check_pixmap = QStyle.SP_DialogApplyButton
     x_pixmap = QStyle.SP_MessageBoxCritical
+    
     self.check_icon = self.style().standardIcon(check_pixmap)
     self.x_icon = self.style().standardIcon(x_pixmap)
     
@@ -40,9 +41,9 @@ class CameraTabs(QWidget):
     # function to run when signal is received from cam disconnect
     dispatcher.connect(self.change_icon, signal = "cam_disconnect", sender = dispatcher.Any)
     
-  def create_cams(self, cam_handles):
-    for i in range(len(cam_handles)):
-      self.cams.append(Camera(cam_handles[i], self.change_icon))
+  # ~ def create_cams(self, cam_handles):
+    # ~ for i in range(len(cam_handles)):
+      # ~ self.cams.append(Camera(cam_handles[i], self.change_icon))
   
   def add_cams_to_tabs(self, cameras):
     for i, cam in enumerate(cameras):

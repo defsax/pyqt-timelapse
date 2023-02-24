@@ -13,7 +13,6 @@ class StartQuit(QWidget):
     layout = QHBoxLayout()
     
     self.start_btn = QPushButton("Start", self)
-    # ~ self.start_btn.clicked.connect(self.handle_start)
     self.start_btn.clicked.connect(self.handle_start)
     layout.addWidget(self.start_btn)
     
