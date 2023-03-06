@@ -19,6 +19,7 @@ from widgets.filename_widget import FileNameBox
 from widgets.location_widget import LocationOptions
 from widgets.start_quit_widget import StartQuit
 from widgets.status_widget import StatusBox
+from widgets.plotter_widget import Plotter
 
 from threads.timelapse_thread import TimelapseThread
 from threads.camera_thread_manager import CameraThreadManager
@@ -105,6 +106,8 @@ class MainWindow(QMainWindow):
         options.addWidget(self.pics_location, stretch=2)
         options.addWidget(self.status_box, stretch=1)
         options.addWidget(self.start_quit, stretch=1)
+        
+        self.plotter = Plotter(self.sensors)
 
         # periodically check for cameras being hooked up
         # pass camera id to camera tabs widget (or have camera tabs do this)

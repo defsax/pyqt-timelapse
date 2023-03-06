@@ -18,7 +18,7 @@ class ArduinoHandler(QWidget):
         self.serial.open(QIODevice.ReadWrite)
         
     def get_data(self):
-        return self.rh, self.temp
+        return self.port, self.rh, self.temp
 
     @pyqtSlot()
     def receive(self):
@@ -26,6 +26,7 @@ class ArduinoHandler(QWidget):
             try:
                 text = self.serial.readLine().data().decode()
                 text = text.rstrip('\r\n')
+                # ~ print(self.port, ":", text)
                 self.rh = text.split(",")[0]
                 self.temp = text.split(",")[1]
                 
